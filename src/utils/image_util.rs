@@ -1,6 +1,6 @@
 use colored::Colorize;
 use image::DynamicImage;
-use std::PathBuf;
+use std::path::PathBuf;
 
 pub fn save_image(img: DynamicImage, output_file: PathBuf) -> bool {
     match img.save(output_file) {

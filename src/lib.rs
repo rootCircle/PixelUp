@@ -3,8 +3,10 @@ use colored::Colorize;
 use clap::{Parser, ValueEnum};
 use image::{DynamicImage, io::Reader as ImageReader};
 mod utils;
-
-use crate::utils::save_image;
+mod photo_filters;
+use crate::photo_filters::img_sepia::apply_sepia_filter;
+use crate::photo_filters::img_grayscale::apply_grayscale;
+use crate::utils::image_util::save_image;
 // use pixel_up::utils;
 
 const DEFAULT_IMAGE_OUTPUT_FILENAME: &str = "output.png";
@@ -89,7 +91,7 @@ impl Args {
     pub fn apply_filters(&mut self, mut img: DynamicImage) {
         let img = match self.get_filter() {
             // Filters::Blur => {},
-            Filters::GrayScale => {
+            Filters::Grayscale => {
                 apply_grayscale(&mut img)
             },
             Filters::Sepia => {
@@ -99,7 +101,7 @@ impl Args {
             // Filters::Negative => {},
         };
 
-        save_image()
+        save_image(img, self.get_output());
 
         // pixel_up::save_image()
     }
@@ -117,42 +119,7 @@ impl Default for Args {
 pub enum Filters 
 {
     Sepia,
-    GrayScale,
+    Grayscale,
     Negative,
     Blur,
 }
-
-
-
-pub fn apply_sepia_filter(img: &mut DynamicImage) -> DynamicImage {
-    let img = &mut img.to_rgb8();
-    let (width, height) = img.dimensions();
-    for x in 0..width {
-        for y in 0..height {
-            let pixel = img.get_pixel(x, y);
-            let (r, g, b) = (pixel[0], pixel[1], pixel[2]);
-            let r_out = ((r as f32 * 0.393) + (g as f32 * 0.769) + (b as f32 * 0.189)) as u8;
-            let g_out = ((r as f32 * 0.349) + (g as f32 * 0.686) + (b as f32 * 0.168)) as u8;
-            let b_out = ((r as f32 * 0.272) + (g as f32 * 0.534) + (b as f32 * 0.131)) as u8;
-            img.put_pixel(x, y, image::Rgb([r_out, g_out, b_out]));
-        }
-    }
-
-    DynamicImage::ImageRgb8(img.clone())
-}
-
-pub fn apply_grayscale(img: &mut DynamicImage) -> DynamicImage{
-    let img = &mut img.to_rgb8();
-    let (width, height) = img.dimensions();
-    for x in 0..width {
-        for y in 0..height {
-            let pixel = img.get_pixel(x, y);
-            let (r, g, b) = (pixel[0], pixel[1], pixel[2]);
-            let avg = ((r as f32) + (g as f32) + (b as f32) / 3.0) as u8;
-            img.put_pixel(x, y, image::Rgb([avg, avg, avg]));
-        }
-    }
-
-    DynamicImage::ImageRgb8(img.clone())
-}
-

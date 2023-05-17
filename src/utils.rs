@@ -1,1 +1,1 @@
-mod utils;
+pub mod image_util;
