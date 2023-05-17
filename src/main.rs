@@ -1,39 +1,13 @@
-use clap::{Parser, ValueEnum};
-use std::path::PathBuf;
+use pixel_up::Args;
 
-const DEFAULT_IMAGE_OUTPUT_FILENAME: &str = "output.png";
-
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum Filters 
-{
-    Sepia,
-    Monocolor,
-    Negative,
-    Blur,
-}
-
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    #[arg(short = 'i', long, required = true)]
-    src: PathBuf,
-
-    #[arg(short, long)]
-    output: Option<PathBuf>,
-
-    #[arg(short, long,value_enum, required = true)]
-    filter: Filters
-}
 
 fn main() {
-    let mut args = Args::parse();
-
-    args.output = match args.output {
-        Some(x) => Some(x),
-        None => Some(PathBuf::from(DEFAULT_IMAGE_OUTPUT_FILENAME)),
-    };
+    let mut args = Args::new();
     
-    println!("{:#?}", args);
+    let img_result = args.check_and_open();
+    
+    let img_result = img_result.unwrap();
+
+    args.apply_filters(img_result);
     
 }

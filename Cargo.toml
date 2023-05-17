@@ -8,3 +8,5 @@ description = "PixelUp is a Rust-based CLI tool that enables users to apply imag
 
 [dependencies]
 clap = { version = "4.2.7", features = ["derive"] }
+colored = "2.0.0"
+image = "0.24.6"
