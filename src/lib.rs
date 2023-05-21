@@ -4,11 +4,11 @@ use image::{io::Reader as ImageReader, DynamicImage};
 use std::{path::PathBuf, process};
 mod photo_filters;
 mod utils;
+use crate::photo_filters::img_blur::apply_blur;
 use crate::photo_filters::img_grayscale::apply_grayscale;
 use crate::photo_filters::img_negative::apply_negative;
-use crate::photo_filters::img_sepia::apply_sepia_filter;
-use crate::photo_filters::img_blur::apply_blur;
 use crate::photo_filters::img_reflection::apply_reflection;
+use crate::photo_filters::img_sepia::apply_sepia_filter;
 use crate::utils::image_util::save_image;
 // use pixel_up::utils;
 
