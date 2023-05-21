@@ -1,17 +1,18 @@
-use std::{path::PathBuf,process};
-use colored::Colorize;
 use clap::{Parser, ValueEnum};
-use image::{DynamicImage, io::Reader as ImageReader};
-mod utils;
+use colored::Colorize;
+use image::{io::Reader as ImageReader, DynamicImage};
+use std::{path::PathBuf, process};
 mod photo_filters;
-use crate::photo_filters::img_sepia::apply_sepia_filter;
+mod utils;
 use crate::photo_filters::img_grayscale::apply_grayscale;
+use crate::photo_filters::img_negative::apply_negative;
+use crate::photo_filters::img_sepia::apply_sepia_filter;
+use crate::photo_filters::img_blur::apply_blur;
+use crate::photo_filters::img_reflection::apply_reflection;
 use crate::utils::image_util::save_image;
 // use pixel_up::utils;
 
 const DEFAULT_IMAGE_OUTPUT_FILENAME: &str = "output.png";
-
-
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -22,10 +23,9 @@ pub struct Args {
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    #[arg(short, long,value_enum, required = true)]
-    filter: Filters
+    #[arg(short, long, value_enum, required = true)]
+    filter: Filters,
 }
-
 
 impl Args {
     pub fn new() -> Self {
@@ -33,8 +33,7 @@ impl Args {
     }
 
     // It will validate the fields of Args Struct and return Result enum containing opened Dynamic Image
-    pub fn check_and_open(&mut self) -> Result<DynamicImage, image::ImageError>{
-        
+    pub fn check_and_open(&mut self) -> Result<DynamicImage, image::ImageError> {
         // Check if destination file with same name exists or not, for clash
         // This check is done only in case, if output filename is specified
         // Else it will populate, it with default value
@@ -42,27 +41,29 @@ impl Args {
 
         // Check if source file exists or not
         self.check_source_file();
-        
+
         // Checks Image Type and returns Dynamic Image
         self.check_and_open_image()
-        
     }
 
     fn check_destination_file(&mut self) {
         self.output = match &self.output {
             Some(x) => {
                 if x.exists() {
-                    eprintln!("{}", "Destination File with same name exists!".yellow().bold());
+                    eprintln!(
+                        "{}",
+                        "Destination File with same name exists!".yellow().bold()
+                    );
                     process::exit(1);
                 }
                 Some(x.to_path_buf())
-            },
+            }
             None => Some(PathBuf::from(DEFAULT_IMAGE_OUTPUT_FILENAME)),
         };
     }
 
-    fn check_source_file(&mut self) {   
-        if ! self.src.exists() {
+    fn check_source_file(&mut self) {
+        if !self.src.exists() {
             eprintln!("{}", "Source File does not exists!".red().bold());
             process::exit(1);
         }
@@ -70,10 +71,10 @@ impl Args {
 
     fn check_and_open_image(&mut self) -> Result<DynamicImage, image::ImageError> {
         let img_result = ImageReader::open(&self.src).unwrap().decode();
-            if let Err(ref err) = img_result {
-                println!("Error decoding image: {}", err);
-                process::exit(2);
-            }
+        if let Err(ref err) = img_result {
+            println!("Error decoding image: {}", err);
+            process::exit(2);
+        }
         img_result
     }
 
@@ -84,28 +85,22 @@ impl Args {
     pub fn get_output(&mut self) -> PathBuf {
         match &self.output {
             Some(x) => x.to_path_buf(),
-            None => PathBuf::new() 
+            None => PathBuf::new(),
         }
     }
 
-    pub fn apply_filters(&mut self, mut img: DynamicImage) {
+    pub fn apply_filters(&mut self, img: &mut DynamicImage) {
         let img = match self.get_filter() {
             // Filters::Blur => {},
-            Filters::Grayscale => {
-                apply_grayscale(&mut img)
-            },
-            Filters::Sepia => {
-                apply_sepia_filter(&mut img)
-            },
-            Filters::Negative | Filters::Blur => todo!()
-            // Filters::Negative => {},
+            Filters::Grayscale => apply_grayscale(img),
+            Filters::Sepia => apply_sepia_filter(img),
+            Filters::Negative => apply_negative(img),
+            Filters::Blur => apply_blur(img),
+            Filters::Reflection => apply_reflection(img),
         };
 
-        save_image(img, self.get_output());
-
-        // pixel_up::save_image()
+        save_image(&img, &self.get_output());
     }
-
 }
 
 impl Default for Args {
@@ -114,12 +109,11 @@ impl Default for Args {
     }
 }
 
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum Filters 
-{
+pub enum Filters {
     Sepia,
     Grayscale,
     Negative,
     Blur,
+    Reflection,
 }
