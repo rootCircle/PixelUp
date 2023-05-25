@@ -3,8 +3,12 @@ use image::DynamicImage;
 const BLUR_STRETCH: u32 = 1;
 
 pub fn apply_blur(img: &mut DynamicImage) -> DynamicImage {
-    let mut img = img.to_rgb8();
+    let img = img.to_rgb8();
+    let mut new_img = img.clone();
     let (width, height) = img.dimensions();
+
+    // Max Distance in Gaussian Kernel from central pixel in a defined straight direction
+    let blur_stretch = std::cmp::min(std::cmp::min(height / 2, width / 2), BLUR_STRETCH);
 
     for x in 0..width {
         for y in 0..height {
@@ -14,12 +18,8 @@ pub fn apply_blur(img: &mut DynamicImage) -> DynamicImage {
             let mut b_sum: u32 = 0;
             let mut c: u32 = 0;
 
-            // Max Distance in Gaussian Kernel from central pixel in a defined straight direction
-
-            let blur_stretch = std::cmp::min(std::cmp::min(height / 2, width / 2), BLUR_STRETCH);
-
             // Set of conditions to prevent overflow in extremes sides while averaging
-            let row_start: u32 = if y >= blur_stretch {
+            let row_start = if y >= blur_stretch {
                 y - blur_stretch
             } else {
                 0
@@ -55,7 +55,7 @@ pub fn apply_blur(img: &mut DynamicImage) -> DynamicImage {
                 }
             }
 
-            img.put_pixel(
+            new_img.put_pixel(
                 x,
                 y,
                 image::Rgb([
@@ -67,5 +67,5 @@ pub fn apply_blur(img: &mut DynamicImage) -> DynamicImage {
         }
     }
 
-    DynamicImage::ImageRgb8(img)
+    DynamicImage::ImageRgb8(new_img)
 }
