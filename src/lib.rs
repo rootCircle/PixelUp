@@ -9,6 +9,7 @@ use crate::photo_filters::img_grayscale::apply_grayscale;
 use crate::photo_filters::img_negative::apply_negative;
 use crate::photo_filters::img_reflection::apply_reflection;
 use crate::photo_filters::img_sepia::apply_sepia_filter;
+use crate::photo_filters::img_edge::apply_edge;
 use crate::utils::image_util::save_image;
 // use pixel_up::utils;
 
@@ -97,6 +98,7 @@ impl Args {
             Filters::Negative => apply_negative(img),
             Filters::Blur => apply_blur(img),
             Filters::Reflection => apply_reflection(img),
+            Filters::Edge => apply_edge(img),
         };
 
         save_image(&img, &self.get_output());
@@ -116,4 +118,5 @@ pub enum Filters {
     Negative,
     Blur,
     Reflection,
+    Edge
 }
