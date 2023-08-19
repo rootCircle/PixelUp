@@ -1,4 +1,4 @@
-use image::{DynamicImage,};
+use image::DynamicImage;
 
 pub fn apply_edge(img: &mut DynamicImage) -> DynamicImage {
     

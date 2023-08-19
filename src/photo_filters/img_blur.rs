@@ -12,7 +12,7 @@ pub fn apply_blur(img: &mut DynamicImage) -> DynamicImage {
 
     for x in 0..width {
         for y in 0..height {
-            // Store sum and count of neighbouring pixels
+            // Store sum and count of neighboring pixels
             let mut r_sum: u32 = 0;
             let mut g_sum: u32 = 0;
             let mut b_sum: u32 = 0;
